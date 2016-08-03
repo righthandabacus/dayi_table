@@ -170,7 +170,7 @@ def create_wordfreq(dbfilename, wordfreqfile):
         SELECT code AS code, char AS char, COALESCE(freq,0) AS freq
         FROM lookup
         LEFT JOIN wordfreq USING(char)
-        ORDER BY code ASC, COALESCE(freq,0) DESC''')
+        ORDER BY code ASC, COALESCE(freq,0) DESC, char ASC''')
     # Write and output
     conn.commit()
     conn.close()
