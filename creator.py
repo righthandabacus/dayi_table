@@ -58,7 +58,7 @@ def populate_db(dbfilename):
 
     # Override some symbols: Remove these symbols from database and replace with new codepoints
     data = filter(None,'''
-        =     ，,。,、,！,？,「,」,（,）,『,』,　
+        =     ，,。,、,！,？,　,「,」,（,）,『,』
         =,    ，,“,”,‘,’,〝,〞,〃
         =,,   《,︽,〈,︿,∩,∪,∫,∮,≦,◢
         =.    。,、,﹕,,．,：,‥,…,‧,∴,∵
@@ -72,7 +72,7 @@ def populate_db(dbfilename):
         =]    」,）,』,】,］,〕,｝,〗,〙,〛,╯
         =]]   ﹂,︶,﹄,︼,﹇,︺,︸,╮
     '''.strip().decode('utf8').split("\n"))
-    code_dict = dict((code,chars.split(",")) for d in data for code,chars in [d.split()])
+    code_dict = dict((code,chars.split(",")) for d in data for code,chars in [d.split(None,1)])
     symbol_chars = [(c,) for c in set(c for v in code_dict.values() for c in v)]
     symbol_codes = [(k,) for k in code_dict.keys()]
     symbol_defs = [(k,c) for k,cc in code_dict.iteritems() for c in cc]
