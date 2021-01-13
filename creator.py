@@ -27,7 +27,7 @@ def read_incode_outchar(files):
             for l in fp.readlines():
                 if l[0] in ['#','%'] or ' ' not in l.strip():
                     continue # skip comment lines or lines doesn't seem like code point
-                inout = l.decode('utf8').strip().split(None,1)
+                inout = l.strip().split(None,1)
                 if len(inout) != 2:
                     continue # not in "code output" format
                 incode, outchar = inout
@@ -42,9 +42,9 @@ def populate_db(dbfilename):
     sqlparams  = [c for c in codepoints if len(c[1])==1]
     badcodes   = [c for c in codepoints if len(c[1])!=1]
     if badcodes:
-        print "Codes ignored:"
+        print("Codes ignored:")
         for code, word in badcodes:
-            print "%s = %r (len %d)" % (code, word, len(word))
+            print("{:s} = {:r} (len {:d})".format(code, word, len(word)))
 
     # Create and write to DB
     conn = sqlite3.connect(dbfilename)
@@ -54,7 +54,7 @@ def populate_db(dbfilename):
     if sqlparams:
         cur.executemany('INSERT OR IGNORE INTO lookup VALUES (?,?)', sqlparams)
         count = cur.execute('SELECT COUNT(*) FROM lookup').fetchall()[0][0]
-        print "Did %d insert from %d files, current table size: %d" % (len(sqlparams), len(files), count)
+        print("Did {} insert from {} files, current table size: {}".format(len(sqlparams), len(files), count))
 
     # Override some symbols: Remove these symbols from database and replace with new codepoints
     data = filter(None,'''
@@ -71,11 +71,11 @@ def populate_db(dbfilename):
         =[[   ﹁,︵,﹃,︻,﹈,︹,︷,╰
         =]    」,）,』,】,］,〕,｝,〗,〙,〛,╯
         =]]   ﹂,︶,﹄,︼,﹇,︺,︸,╮
-    '''.strip().decode('utf8').split("\n"))
+    '''.strip().split("\n"))
     code_dict = dict((code,chars.split(",")) for d in data for code,chars in [d.split(None,1)])
     symbol_chars = [(c,) for c in set(c for v in code_dict.values() for c in v)]
     symbol_codes = [(k,) for k in code_dict.keys()]
-    symbol_defs = [(k,c) for k,cc in code_dict.iteritems() for c in cc]
+    symbol_defs = [(k,c) for k,cc in code_dict.items() for c in cc]
     cur.executemany('DELETE FROM lookup WHERE char=?', symbol_chars)
     cur.executemany('DELETE FROM lookup WHERE code=?', symbol_codes)
     cur.executemany('INSERT OR IGNORE INTO lookup VALUES (?,?)', symbol_defs)
@@ -140,7 +140,7 @@ def create_wordfreq(dbfilename, wordfreqfile):
             # structure of the file:
             # 單字  序號  (部首)  筆劃  頻次  頻率  累積 頻次  累積 頻率  見檔次  見檔率  
             for l in fp.readlines():
-                toks = l.decode('utf8').split()
+                toks = l.split()
                 if len(toks[0]) != 1:
                     continue # probably first line, the header
                 yield toks[0], int(toks[3]) # return the char and frequency count
@@ -158,7 +158,7 @@ def create_wordfreq(dbfilename, wordfreqfile):
         《 》 ︽ ︾ ： ﹕  ． ‧ ； ′
         「 」 （ ） 『 』 【 】 ［ ］ 〔 〕 ｛ ｝ 〈 〉 〖 〗〘〙〚〛
         ﹁ ﹂ ︵ ︶ ﹃ ﹄ ︻ ︼ ﹇ ﹈ ︹ ︺ ︷ ︸ ︿ ﹀
-    '''.strip().decode('utf8').split()
+    '''.strip().split()
     delta = 1.0/(1.0+len(symchars))
     for i,c in enumerate(symchars):
         freq = 1.0 - i*(delta+1)
@@ -269,9 +269,9 @@ def output_gcin(dbfilename, outputfilename):
     # Write to output
     wordcount = len(outputlines)
     outputlines = [_GCIN_FILE_HEADER] + outputlines + [_GCIN_FILE_FOOTER]
-    with open(outputfilename, "w") as fp:
-        fp.write("\n".join(outputlines).encode('utf8'))
-    print "Wrote %d code points to GCIN file %s" % (wordcount, outputfilename)
+    with open(outputfilename, "w", encoding="utf-8") as fp:
+        fp.write("\n".join(outputlines))
+    print("Wrote {} code points to GCIN file {}".format(wordcount, outputfilename))
 
 def output_macosx(dbfilename, outputfilename):
     "Generate IME table from `result` in the database and write to outputfilename"
@@ -291,9 +291,9 @@ def output_macosx(dbfilename, outputfilename):
     outputlines = [_MACOSX_FILE_HEADER] +\
                   ["%-6s%s" % (code, ",".join(chars)) for code,chars in outputtable] +\
                   [_MACOSX_FILE_FOOTER]
-    with open(outputfilename, "w") as fp:
-        fp.write("\n".join(outputlines).encode('utf-16-be'))
-    print "Wrote %d code points to OSX input table file %s" % (wordcount, outputfilename)
+    with open(outputfilename, "w", encoding="utf-16-be") as fp:
+        fp.write("\n".join(outputlines))
+    print("Wrote {} code points to OSX input table file {}".format(wordcount, outputfilename))
 
 def main():
     options = parse_cmdline()
